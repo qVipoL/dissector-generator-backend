@@ -7,7 +7,7 @@ class Dissector
 
     public $id;
     public $userId;
-    public $user;
+    public $userName;
     public $name;
     public $description;
     public $code;
@@ -19,9 +19,13 @@ class Dissector
         $this->conn = $db;
     }
 
-    private function executeQuery($query)
+    private function executeQuery($query, $param = null)
     {
         $stmt = $this->conn->prepare($query);
+
+        if ($param != null)
+            $stmt->bindParam(1, $param);
+
         $stmt->execute();
 
         return $stmt;
@@ -47,7 +51,7 @@ class Dissector
 
     public function getById($id)
     {
-        return $this->executeQuery('
+        $result = $this->executeQuery('
             SELECT d.id,
                 d.userId,
                 u.userName,
@@ -57,10 +61,26 @@ class Dissector
                 d.createdAt,
                 d.updatedAt
             FROM ' . $this->table . ' AS d
-            WHERE d.id = ' . $id . '
             JOIN Users AS u 
             ON d.userId = u.id
-            ORDER BY d.createdAt DESC;
-        ');
+            WHERE d.id = ?
+            ORDER BY d.createdAt DESC
+            LIMIT 0,1;
+        ', $id);
+
+        $row = $result->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) throw new Exception('Dissector not found');
+
+        $this->id = $id;
+        $this->userId = $row['userId'];
+        $this->userName = $row['userName'];
+        $this->name = $row['name'];
+        $this->description = $row['description'];
+        $this->code = $row['code'];
+        $this->createdAt = $row['createdAt'];
+        $this->updatedAt = $row['updatedAt'];
+
+        return $this;
     }
 }

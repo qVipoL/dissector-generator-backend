@@ -43,6 +43,31 @@ class DissectorController
 
     function getById()
     {
-        $result = $this->dissector->getById(1);
+        try {
+            $id = isset($_GET['id']) ? $_GET['id'] : die();
+
+            $result = $this->dissector->getById($id);
+
+            $response = array(
+                'id' => $result->id,
+                'userId' => $result->userId,
+                'userName' => $result->userName,
+                'name' => $result->name,
+                'description' => $result->description,
+                'code' => $result->code,
+                'createdAt' => $result->createdAt,
+                'updatedAt' => $result->updatedAt
+            );
+
+            echo json_encode(array(
+                'success' => true,
+                'dissector' => $response
+            ));
+        } catch (Exception $err) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => $err->getMessage()
+            ));
+        }
     }
 }
