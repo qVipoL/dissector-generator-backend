@@ -1,5 +1,17 @@
 <?php
 
+class QueryParam
+{
+    public $param;
+    public $value;
+
+    public function __construct($param, $value)
+    {
+        $this->param = $param;
+        $this->value = $value;
+    }
+}
+
 class Dissector
 {
     private $conn;
@@ -11,6 +23,7 @@ class Dissector
     public $name;
     public $description;
     public $code;
+    public $fields;
     public $createdAt;
     public $updatedAt;
 
@@ -19,14 +32,15 @@ class Dissector
         $this->conn = $db;
     }
 
-    private function executeQuery($query, $param = null)
+    private function executeQuery($query, $queryParams = null)
     {
         $stmt = $this->conn->prepare($query);
 
-        if ($param != null)
-            $stmt->bindParam(1, $param);
+        if ($queryParams != null)
+            foreach ($queryParams as $queryParam)
+                $stmt->bindParam($queryParam->param, $queryParam->value);
 
-        $stmt->execute();
+        if (!$stmt->execute()) return false;
 
         return $stmt;
     }
@@ -40,6 +54,7 @@ class Dissector
                 d.name,
                 d.description,
                 d.code,
+                d.fields,
                 d.createdAt,
                 d.updatedAt
             FROM ' . $this->table . ' AS d
@@ -58,6 +73,7 @@ class Dissector
                 d.name,
                 d.description,
                 d.code,
+                d.fields,
                 d.createdAt,
                 d.updatedAt
             FROM ' . $this->table . ' AS d
@@ -66,7 +82,7 @@ class Dissector
             WHERE d.id = ?
             ORDER BY d.createdAt DESC
             LIMIT 0,1;
-        ', $id);
+        ', array(new QueryParam(1, $id)));
 
         $row = $result->fetch(PDO::FETCH_ASSOC);
 
@@ -78,9 +94,30 @@ class Dissector
         $this->name = $row['name'];
         $this->description = $row['description'];
         $this->code = $row['code'];
+        $this->fields = $row['fields'];
         $this->createdAt = $row['createdAt'];
         $this->updatedAt = $row['updatedAt'];
 
         return $this;
+    }
+
+    function create($data)
+    {
+        $result = $this->executeQuery('
+            INSERT INTO ' . $this->table . '
+            SET userId = :userId,
+                name = :name,
+                description = :description,
+                code = :code,
+                fields = :fields
+        ', array(
+            new QueryParam(':userId', htmlspecialchars(strip_tags($data->userId))),
+            new QueryParam(':name', htmlspecialchars(strip_tags($data->name))),
+            new QueryParam(':description', htmlspecialchars(strip_tags($data->description))),
+            new QueryParam(':code', $data->code),
+            new QueryParam(':fields', json_encode($data->fields))
+        ));
+
+        if ($result == false) throw new Exception('Could not save the dissector to db');
     }
 }

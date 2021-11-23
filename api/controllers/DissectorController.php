@@ -31,6 +31,7 @@ class DissectorController
                 'userName' => $userName,
                 'name' => $name,
                 'code' => $code,
+                'fields' => $fields,
                 'createdAt' => $createdAt,
                 'updatedAt' => $updatedAt
             );
@@ -62,6 +63,30 @@ class DissectorController
             echo json_encode(array(
                 'success' => true,
                 'dissector' => $response
+            ));
+        } catch (Exception $err) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => $err->getMessage()
+            ));
+        }
+    }
+
+    function create()
+    {
+        try {
+            $data = json_decode(file_get_contents("php://input"));
+
+            shell_exec('echo \'' . strip_tags($data->code) . '\' >> ../../assets/in.lua');
+            $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
+            shell_exec('rm ../../assets/in.lua');
+
+            $data->$code = $code;
+            $this->dissector->create($data);
+
+            echo json_encode(array(
+                'success' => true,
+                'message' => 'Dissector created successfully'
             ));
         } catch (Exception $err) {
             echo json_encode(array(
