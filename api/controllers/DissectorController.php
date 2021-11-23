@@ -1,13 +1,13 @@
 <?php
 
-include_once '../../../config/Database.php';
-include_once '../../../models/Dissector.php';
+include_once dirname(__FILE__) . '/../../config/Database.php';
+include_once dirname(__FILE__) .  '/../../models/Dissector.php';
 
 class DissectorController
 {
     private $dissector;
 
-    function __construct()
+    public function __construct()
     {
         $database = new Database();
         $db = $database->connect();
@@ -15,7 +15,7 @@ class DissectorController
         $this->dissector = new Dissector($db);
     }
 
-    function getAll()
+    public function getAll()
     {
         $response = array();
         $response['dissectors'] = array();
@@ -42,7 +42,7 @@ class DissectorController
         echo json_encode($response);
     }
 
-    function getById()
+    public function getById()
     {
         try {
             $id = isset($_GET['id']) ? $_GET['id'] : die();
@@ -72,7 +72,7 @@ class DissectorController
         }
     }
 
-    function create()
+    public function create()
     {
         try {
             $data = json_decode(file_get_contents("php://input"));
@@ -87,6 +87,50 @@ class DissectorController
             echo json_encode(array(
                 'success' => true,
                 'message' => 'Dissector created successfully'
+            ));
+        } catch (Exception $err) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => $err->getMessage()
+            ));
+        }
+    }
+
+    public function update()
+    {
+        try {
+            $id = isset($_GET['id']) ? $_GET['id'] : die();
+            $data = json_decode(file_get_contents("php://input"));
+
+            shell_exec('echo \'' . strip_tags($data->code) . '\' >> ../../assets/in.lua');
+            $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
+            shell_exec('rm ../../assets/in.lua');
+
+            $data->$code = $code;
+            $this->dissector->update($id, $data);
+
+            echo json_encode(array(
+                'success' => true,
+                'message' => 'Dissector updated successfully'
+            ));
+        } catch (Exception $err) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => $err->getMessage()
+            ));
+        }
+    }
+
+    public function delete()
+    {
+        try {
+            $id = isset($_GET['id']) ? $_GET['id'] : die();
+
+            $this->dissector->delete($id);
+
+            echo json_encode(array(
+                'success' => true,
+                'message' => 'Dissector delete successfully'
             ));
         } catch (Exception $err) {
             echo json_encode(array(
