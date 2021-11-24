@@ -1,6 +1,6 @@
 <?php
 
-header('Access-Control-Allow_origin: *');
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
 include_once dirname(__FILE__) . '/../../controllers/DissectorController.php';
