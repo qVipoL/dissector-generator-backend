@@ -1,12 +1,11 @@
 <?php
 
 include_once dirname(__FILE__) . '/../util/QueryParam.php';
+include_once dirname(__FILE__) . '/Model.php';
 
-class Dissector
+
+class Dissector extends Model
 {
-    private $conn;
-    private $table = 'Dissectors';
-
     public $id;
     public $userId;
     public $userName;
@@ -19,20 +18,7 @@ class Dissector
 
     public function __construct($db)
     {
-        $this->conn = $db;
-    }
-
-    private function executeQuery($query, $queryParams = null)
-    {
-        $stmt = $this->conn->prepare($query);
-
-        if ($queryParams != null)
-            foreach ($queryParams as $queryParam)
-                $stmt->bindParam($queryParam->param, $queryParam->value);
-
-        if (!$stmt->execute()) return false;
-
-        return $stmt;
+        parent::__construct($db, 'Dissectors');
     }
 
     public function getAll()
