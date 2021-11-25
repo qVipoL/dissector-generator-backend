@@ -43,7 +43,7 @@ class AuthController
         session_destroy();
 
         echo json_encode(array(
-            'success' => false,
+            'success' => true,
             'message' => 'Logout successful'
         ));
     }
