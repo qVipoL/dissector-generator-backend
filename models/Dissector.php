@@ -96,8 +96,21 @@ class Dissector extends Model
         if ($result == false) throw new Exception('Could not save the dissector to db');
     }
 
-    public function update($id, $data)
+    public function update($userId, $id, $data)
     {
+        $dissector = $this->executeQuery('
+            SELECT id
+            FROM ' . $this->table . '
+            WHERE id = :id AND userId = :userId
+            LIMIT 0,1;
+        ', array(
+            new QueryParam(':id', $id),
+            new QueryParam(':userId', $userId)
+        ));
+
+        $row = $dissector->fetch(PDO::FETCH_ASSOC);
+        if (!$row) throw new Exception('Dissector not found');
+
         $result = $this->executeQuery('
             UPDATE ' . $this->table . '
             SET
@@ -117,8 +130,21 @@ class Dissector extends Model
         if ($result == false) throw new Exception('Could not update the dissector');
     }
 
-    public function delete($id)
+    public function delete($userId, $id)
     {
+        $dissector = $this->executeQuery('
+            SELECT id
+            FROM ' . $this->table . '
+            WHERE id = :id AND userId = :userId
+            LIMIT 0,1;
+        ', array(
+            new QueryParam(':id', $id),
+            new QueryParam(':userId', $userId)
+        ));
+
+        $row = $dissector->fetch(PDO::FETCH_ASSOC);
+        if (!$row) throw new Exception('Dissector not found');
+
         $result = $this->executeQuery('
             DELETE FROM ' . $this->table . '
             WHERE id = :id;

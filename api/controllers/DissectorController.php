@@ -81,7 +81,8 @@ class DissectorController
             $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
             shell_exec('rm ../../assets/in.lua');
 
-            $data->$code = $code;
+            $data->code = $code;
+            $data->userId = $_SESSION['userId'];
             $this->dissector->create($data);
 
             echo json_encode(array(
@@ -101,13 +102,14 @@ class DissectorController
         try {
             $id = isset($_GET['id']) ? $_GET['id'] : die();
             $data = json_decode(file_get_contents("php://input"));
+            $userId = $_SESSION['userId'];
 
             shell_exec('echo \'' . strip_tags($data->code) . '\' >> ../../assets/in.lua');
             $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
             shell_exec('rm ../../assets/in.lua');
 
-            $data->$code = $code;
-            $this->dissector->update($id, $data);
+            $data->code = $code;
+            $this->dissector->update($userId, $id, $data);
 
             echo json_encode(array(
                 'success' => true,
@@ -125,8 +127,9 @@ class DissectorController
     {
         try {
             $id = isset($_GET['id']) ? $_GET['id'] : die();
+            $userId = $_SESSION['userId'];
 
-            $this->dissector->delete($id);
+            $this->dissector->delete($userId, $id);
 
             echo json_encode(array(
                 'success' => true,
