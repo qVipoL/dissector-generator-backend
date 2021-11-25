@@ -27,7 +27,8 @@ class AuthController
 
             echo json_encode(array(
                 'success' => true,
-                'message' => 'Login successful'
+                'message' => 'Login successful',
+                'user' => $user
             ));
         } catch (Exception $err) {
             echo json_encode(array(
