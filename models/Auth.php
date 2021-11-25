@@ -48,6 +48,18 @@ class Auth extends Model
 
     public function register($data)
     {
+        $user = $this->executeQuery('
+            SELECT id
+            FROM ' . $this->table . ' AS u
+            WHERE email = :email
+            LIMIT 0, 1;
+        ', array(
+            new QueryParam(':email', $data->email)
+        ));
+
+        $row = $user->fetch(PDO::FETCH_ASSOC);
+        if ($row) throw new Exception('User already exists');
+
         $result = $this->executeQuery('
             INSERT INTO ' . $this->table . '
             SET userName = :userName,
