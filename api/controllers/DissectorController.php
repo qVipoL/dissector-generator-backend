@@ -56,6 +56,7 @@ class DissectorController
                 'name' => $result->name,
                 'description' => $result->description,
                 'code' => $result->code,
+                'fields' => $result->fields,
                 'createdAt' => $result->createdAt,
                 'updatedAt' => $result->updatedAt
             );
@@ -72,16 +73,32 @@ class DissectorController
         }
     }
 
-    public function create()
+    public function convert()
     {
         try {
             $data = json_decode(file_get_contents("php://input"));
 
             shell_exec('echo \'' . strip_tags($data->code) . '\' >> ../../assets/in.lua');
-            $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
+            $luaCode = shell_exec('../../assets/diss-gen ../../assets/in.lua');
             shell_exec('rm ../../assets/in.lua');
 
-            $data->code = $code;
+            echo json_encode(array(
+                'success' => true,
+                'luaCode' => $luaCode
+            ));
+        } catch (Exception $err) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => $err->getMessage()
+            ));
+        }
+    }
+
+    public function create()
+    {
+        try {
+            $data = json_decode(file_get_contents("php://input"));
+
             $data->userId = $_SESSION['userId'];
             $this->dissector->create($data);
 
