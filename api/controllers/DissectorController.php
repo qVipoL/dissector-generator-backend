@@ -32,8 +32,7 @@ class DissectorController
                 'name' => $name,
                 'code' => $code,
                 'fields' => $fields,
-                'createdAt' => $createdAt,
-                'updatedAt' => $updatedAt
+                'createdAt' => $createdAt
             );
 
             array_push($response['dissectors'], $dissector_item);
@@ -57,8 +56,7 @@ class DissectorController
                 'description' => $result->description,
                 'code' => $result->code,
                 'fields' => $result->fields,
-                'createdAt' => $result->createdAt,
-                'updatedAt' => $result->updatedAt
+                'createdAt' => $result->createdAt
             );
 
             echo json_encode(array(
@@ -121,11 +119,6 @@ class DissectorController
             $data = json_decode(file_get_contents("php://input"));
             $userId = $_SESSION['userId'];
 
-            shell_exec('echo \'' . strip_tags($data->code) . '\' >> ../../assets/in.lua');
-            $code = shell_exec('../../assets/diss-gen ../../assets/in.lua');
-            shell_exec('rm ../../assets/in.lua');
-
-            $data->code = $code;
             $this->dissector->update($userId, $id, $data);
 
             echo json_encode(array(

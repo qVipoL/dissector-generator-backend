@@ -14,7 +14,6 @@ class Dissector extends Model
     public $code;
     public $fields;
     public $createdAt;
-    public $updatedAt;
 
     public function __construct($db)
     {
@@ -31,8 +30,7 @@ class Dissector extends Model
                 d.description,
                 d.code,
                 d.fields,
-                d.createdAt,
-                d.updatedAt
+                d.createdAt
             FROM ' . $this->table . ' AS d
             JOIN Users AS u 
             ON d.userId = u.id
@@ -50,8 +48,7 @@ class Dissector extends Model
                 d.description,
                 d.code,
                 d.fields,
-                d.createdAt,
-                d.updatedAt
+                d.createdAt
             FROM ' . $this->table . ' AS d
             JOIN Users AS u 
             ON d.userId = u.id
@@ -71,7 +68,6 @@ class Dissector extends Model
         $this->code = $row['code'];
         $this->fields = $row['fields'];
         $this->createdAt = $row['createdAt'];
-        $this->updatedAt = $row['updatedAt'];
 
         return $this;
     }
